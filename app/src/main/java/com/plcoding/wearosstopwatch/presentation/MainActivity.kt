@@ -1,5 +1,6 @@
 package com.plcoding.wearosstopwatch.presentation
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -7,15 +8,21 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.Stop
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,14 +42,38 @@ import java.util.*
 
 class MainActivity : ComponentActivity() {
 
+    val voiceToTextParser by lazy {
+        VoiceToTextParser(application)
+    }
+
+
     private val RQ_SPEECH_REC = 102
 
     private val SPEECH_REQUEST_CODE = 0
 
 
+    @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            var canRecord by remember {
+                mutableStateOf(false)
+            }
+
+            val recordAudioLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission(),
+                onResult = {isGranted ->
+                    canRecord = isGranted
+                }
+            )
+            
+            LaunchedEffect(key1 = recordAudioLauncher) {
+                recordAudioLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            }
+
+            val state by voiceToTextParser.state.collectAsState()
+
+
             val viewModel = viewModel<StopWatchViewModel>()
             val timerState by viewModel.timerState.collectAsStateWithLifecycle()
             val stopWatchText by viewModel.stopWatchText.collectAsStateWithLifecycle()
@@ -59,6 +90,10 @@ class MainActivity : ComponentActivity() {
                     Vignette(vignettePosition = VignettePosition.TopAndBottom)
                 }
             ) {
+
+
+
+
                 StopWatch(
                     state = timerState,
                     text = stopWatchText,
@@ -67,6 +102,32 @@ class MainActivity : ComponentActivity() {
                     voiceControl = { askSpeechInput() },
                     modifier = Modifier.fillMaxSize()
                 )
+
+                Button(
+                    onClick = {
+                        if(state.isSpeaking) {
+                            voiceToTextParser.stopListening()
+                        } else {
+                            voiceToTextParser.startListening()
+                        }
+                    }
+                ) {
+                    AnimatedContent(targetState = state.isSpeaking) {isSpeaking ->
+                        if (isSpeaking) {
+                            Icon(imageVector = Icons.Rounded.Stop, contentDescription = null)
+                        } else {
+                            Icon(imageVector = Icons.Rounded.Mic, contentDescription = null)
+                        }
+
+                    }
+                }
+                AnimatedContent(targetState = state.isSpeaking) {isSpeaking ->
+                    if (isSpeaking) {
+                        Text(text = "Speaking...")
+                    } else {
+                        Text(text = state.spokenText.ifEmpty { "Click on mic to record audio" })
+                    }
+                }
             }
         }
     }

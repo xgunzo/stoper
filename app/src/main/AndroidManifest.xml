@@ -25,6 +25,8 @@
             android:name="com.google.android.wearable.standalone"
             android:value="true" />
 
+
+
         <activity
             android:name=".presentation.MainActivity"
             android:exported="true"
@@ -36,6 +38,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
 
+    </application>
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
 </manifest>
