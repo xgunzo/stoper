@@ -92,15 +92,19 @@ class MainActivity : ComponentActivity() {
                 }
             ) {
 
-
-
-
                 StopWatch(
                     state = timerState,
                     text = stopWatchText,
                     onToggleRunning = viewModel::toggleIsRunning,
                     onReset = viewModel::resetTimer,
-                    voiceControl = { askSpeechInput() },
+                    voiceControl = {
+                        if (state.isSpeaking) {
+                            voiceToTextParser.stopListening()
+                        } else {
+                            voiceToTextParser.startListening()
+                        }
+
+                    },
                     modifier = Modifier.fillMaxSize()
                 )
 
@@ -108,7 +112,6 @@ class MainActivity : ComponentActivity() {
                     onClick = {
                         if(state.isSpeaking) {
                             voiceToTextParser.stopListening()
-                            Log.d("myTag", state.toString());
                         } else {
                             voiceToTextParser.startListening()
                         }
@@ -126,6 +129,7 @@ class MainActivity : ComponentActivity() {
                 AnimatedContent(targetState = state.isSpeaking) {isSpeaking ->
                     if (isSpeaking) {
                         Text(text = "Speaking...")
+                        Log.d("myTag", state.toString());
                     } else {
                         Text(text = state.spokenText.ifEmpty { "Click on mic to record audio" })
                     }
@@ -133,44 +137,9 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if(requestCode == RQ_SPEECH_REC && resultCode == Activity.RESULT_OK) {
-            val result = data?.getStringArrayExtra(RecognizerIntent.EXTRA_RESULTS)
-//            tv_text.text = result?.get(0).toString()
-        }
-    }
-
-    private fun askSpeechInput() {
-        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
-            Toast.makeText(this, "Speech recognition is not available", Toast.LENGTH_SHORT).show()
-        } else {
-            val i = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-            i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            i.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-            i.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say something!")
-            startActivityForResult(i, RQ_SPEECH_REC)
-        }
-    }
-
-    // Create an intent that can start the Speech Recognizer activity
-    private fun displaySpeechRecognizer() {
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-        }
-        // This starts the activity and populates the intent with the speech text.
-        startActivityForResult(intent, SPEECH_REQUEST_CODE)
-    }
-
-
-
 }
 
-
 // This callback is invoked when the Speech Recognizer returns.
-
 @Composable
 private fun StopWatch(
     state: TimerState,
@@ -233,7 +202,11 @@ private fun StopWatch(
                 )
             ) {
                 Icon(
-                    imageVector = Icons.Default.Stop,
+                    imageVector = if (state == TimerState.RUNNING) {
+                        Icons.Default.Pause
+                    } else {
+                        Icons.Default.PlayArrow
+                    },
                     contentDescription = null
                 )
             }
