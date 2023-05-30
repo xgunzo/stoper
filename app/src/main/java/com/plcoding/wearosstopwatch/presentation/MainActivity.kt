@@ -100,8 +100,11 @@ class MainActivity : ComponentActivity() {
                     voiceControl = {
                         if (state.isSpeaking) {
                             voiceToTextParser.stopListening()
+
                         } else {
+                            Log.d("myTag","test2");
                             voiceToTextParser.startListening()
+
                         }
 
                     },
@@ -185,7 +188,7 @@ private fun StopWatch(
                 onClick = onReset,
                 enabled = state != TimerState.RESET,
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color(0xF5F5F5)
+                    backgroundColor = Color(0xffdb0000)
                 )
             ) {
                 Icon(
@@ -196,17 +199,12 @@ private fun StopWatch(
             Spacer(modifier = Modifier.width(8.dp))
             Button(
                 onClick = voiceControl,
-                enabled = state != TimerState.RESET,
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color(0xF5F5F5)
+                    backgroundColor = Color(0xffff9a0d)
                 )
             ) {
                 Icon(
-                    imageVector = if (state == TimerState.RUNNING) {
-                        Icons.Default.Pause
-                    } else {
-                        Icons.Default.PlayArrow
-                    },
+                    imageVector = Icons.Rounded.Mic,
                     contentDescription = null
                 )
             }
