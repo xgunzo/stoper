@@ -38,7 +38,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.*
 import com.plcoding.wearosstopwatch.R
+import com.plcoding.wearosstopwatch.presentation.TimerState.*
+import com.plcoding.wearosstopwatch.presentation.StopWatchViewModel.*
 import com.plcoding.wearosstopwatch.presentation.theme.WearOsStopWatchTheme
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import java.util.*
 
 class MainActivity : ComponentActivity() {
@@ -133,6 +137,14 @@ class MainActivity : ComponentActivity() {
                     if (isSpeaking) {
                         Text(text = "Speaking...")
                         Log.d("myTag", state.toString());
+                        if(state.spokenText == "start" || state.toString() == "pause") {
+                            Log.d("myTag", "START/PAUSE");
+                            val result = state.spokenText
+                            //Start/Pause the stoper
+                        } else if (state.spokenText == "stop") {
+                            Log.d("myTag", "STOP");
+                            //Stop the stoper
+                        }
                     } else {
                         Text(text = state.spokenText.ifEmpty { "Click on mic to record audio" })
                     }
