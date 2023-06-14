@@ -104,7 +104,6 @@ class MainActivity : ComponentActivity() {
                     voiceControl = {
                         if (state.isSpeaking) {
                             voiceToTextParser.stopListening()
-
                         } else {
                             Log.d("myTag","test2");
                             voiceToTextParser.startListening()
@@ -115,24 +114,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()
                 )
 
-                Button(
-                    onClick = {
-                        if(state.isSpeaking) {
-                            voiceToTextParser.stopListening()
-                        } else {
-                            voiceToTextParser.startListening()
-                        }
-                    }
-                ) {
-                    AnimatedContent(targetState = state.isSpeaking) {isSpeaking ->
-                        if (isSpeaking) {
-                            Icon(imageVector = Icons.Rounded.Stop, contentDescription = null)
-                        } else {
-                            Icon(imageVector = Icons.Rounded.Mic, contentDescription = null)
-                        }
 
-                    }
-                }
                 AnimatedContent(targetState = state.isSpeaking) {isSpeaking ->
                     if (isSpeaking) {
                         Text(text = "Speaking...")
@@ -140,9 +122,11 @@ class MainActivity : ComponentActivity() {
                         if(state.spokenText == "start" || state.toString() == "pause") {
                             Log.d("myTag", "START/PAUSE");
                             val result = state.spokenText
+                            viewModel.toggleIsRunning()
                             //Start/Pause the stoper
                         } else if (state.spokenText == "stop") {
                             Log.d("myTag", "STOP");
+                            viewModel.resetTimer()
                             //Stop the stoper
                         }
                     } else {

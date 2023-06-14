@@ -2,6 +2,7 @@
 
 package com.plcoding.wearosstopwatch.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,9 +42,10 @@ class StopWatchViewModel: ViewModel() {
     }
 
     fun toggleIsRunning() {
+        Log.d("test",  timerState.value.name)
         when(timerState.value) {
             TimerState.RUNNING -> _timerState.update { TimerState.PAUSED }
-            TimerState.PAUSED,
+            TimerState.PAUSED -> _timerState.update { TimerState.RUNNING }
             TimerState.RESET -> _timerState.update { TimerState.RUNNING }
         }
     }
