@@ -117,20 +117,17 @@ class MainActivity : ComponentActivity() {
 
                 AnimatedContent(targetState = state.isSpeaking) {isSpeaking ->
                     if (isSpeaking) {
-                        Text(text = "Speaking...")
                         Log.d("myTag", state.toString());
-                        if(state.spokenText == "start" || state.toString() == "pause") {
+                        if(state.spokenText == "start" || state.spokenText == "stop") {
                             Log.d("myTag", "START/PAUSE");
                             val result = state.spokenText
                             viewModel.toggleIsRunning()
                             //Start/Pause the stoper
-                        } else if (state.spokenText == "stop") {
+                        } else if (state.spokenText == "reset") {
                             Log.d("myTag", "STOP");
                             viewModel.resetTimer()
                             //Stop the stoper
                         }
-                    } else {
-                        Text(text = state.spokenText.ifEmpty { "Click on mic to record audio" })
                     }
                 }
             }
